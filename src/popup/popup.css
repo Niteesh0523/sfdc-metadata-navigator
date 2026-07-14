@@ -1,0 +1,544 @@
+/* ==========================================================================
+   SFDC Metadata Navigator - Popup Styles
+   ========================================================================== */
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333;
+  background: #fff;
+  width: 360px;
+  min-height: 200px;
+  overflow: hidden;
+}
+
+/* ---------- Popup Container ---------- */
+.popup-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  max-height: 500px;
+}
+
+/* ---------- State Views ---------- */
+.state-view {
+  display: none;
+  flex-direction: column;
+  padding: 16px;
+}
+
+/* Show active state based on data-state attribute */
+.popup-container[data-state="checking-org"] .state-checking-org,
+.popup-container[data-state="not-salesforce"] .state-not-salesforce,
+.popup-container[data-state="loading-index"] .state-loading-index,
+.popup-container[data-state="no-index"] .state-no-index,
+.popup-container[data-state="ready"] .state-ready,
+.popup-container[data-state="searching"] .state-ready,
+.popup-container[data-state="refreshing"] .state-ready,
+.popup-container[data-state="error"] .state-error {
+  display: flex;
+}
+
+/* Ready state uses full available height */
+.state-ready {
+  padding: 0;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+/* ---------- Loading Spinner ---------- */
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #1b96ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-message {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+}
+
+/* ---------- Info / Not Salesforce / No Index States ---------- */
+.info-icon {
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.info-message {
+  text-align: center;
+  color: #444;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.info-hint {
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+/* ---------- Search Section ---------- */
+.search-section {
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: #1b96ff;
+  box-shadow: 0 0 0 2px rgba(27, 150, 255, 0.15);
+  background: #fff;
+}
+
+.search-icon {
+  font-size: 14px;
+  color: #888;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  padding: 8px 0;
+  outline: none;
+  color: #333;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+/* ---------- Refresh Bar ---------- */
+.refresh-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fafafa;
+}
+
+.refresh-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.last-refreshed {
+  font-size: 11px;
+  color: #888;
+}
+
+.stale-indicator {
+  font-size: 11px;
+  color: #e67e22;
+  font-weight: 500;
+}
+
+/* ---------- Refresh Progress ---------- */
+.refresh-progress {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: #f0f7ff;
+  border-bottom: 1px solid #d4e8fc;
+  gap: 8px;
+}
+
+.refresh-progress[hidden] {
+  display: none;
+}
+
+.refresh-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.refresh-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: #1b96ff;
+  border-radius: 2px;
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-indeterminate {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.refresh-progress-text {
+  font-size: 11px;
+  color: #1b96ff;
+  white-space: nowrap;
+}
+
+/* Show refresh progress in refreshing state */
+.popup-container[data-state="refreshing"] .refresh-progress {
+  display: flex;
+}
+
+/* Disable refresh button during refreshing */
+.popup-container[data-state="refreshing"] #refresh-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ---------- Results Container ---------- */
+.results-container {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.results-list {
+  list-style: none;
+  padding: 4px 0;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.result-item:hover,
+.result-item.highlighted {
+  background: #f0f7ff;
+}
+
+.result-item.highlighted {
+  outline: 2px solid #1b96ff;
+  outline-offset: -2px;
+}
+
+.result-item-name {
+  font-size: 13px;
+  color: #333;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.result-item-left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  margin-right: 8px;
+}
+
+.result-item-object {
+  font-size: 11px;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-item-type {
+  font-size: 11px;
+  color: #666;
+  background: #eee;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.no-results-message {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  padding: 24px 12px;
+}
+
+.no-results-message[hidden] {
+  display: none;
+}
+
+/* ---------- Footer ---------- */
+.popup-footer {
+  padding: 8px 12px;
+  border-top: 1px solid #e8e8e8;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.settings-link:hover {
+  color: #1b96ff;
+}
+
+.settings-icon {
+  font-size: 14px;
+}
+
+/* ---------- Error State ---------- */
+.error-icon {
+  font-size: 32px;
+  text-align: center;
+  color: #e74c3c;
+  margin-bottom: 8px;
+}
+
+.error-message {
+  text-align: center;
+  color: #c0392b;
+  font-size: 13px;
+  margin-bottom: 12px;
+  padding: 0 8px;
+  word-wrap: break-word;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: background-color 0.15s, opacity 0.15s;
+}
+
+.btn:focus-visible {
+  outline: 2px solid #1b96ff;
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: #1b96ff;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #0d7de0;
+}
+
+.btn-secondary {
+  background: #e8e8e8;
+  color: #444;
+}
+
+.btn-secondary:hover {
+  background: #d4d4d4;
+}
+
+.btn-icon {
+  background: transparent;
+  color: #666;
+  padding: 4px 6px;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+.btn-icon:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.refresh-icon {
+  font-size: 14px;
+  display: inline-block;
+}
+
+/* Spinning animation for refresh button during refreshing state */
+.popup-container[data-state="refreshing"] .refresh-icon {
+  animation: spin 1s linear infinite;
+}
+
+/* ---------- Stale Indicator Hidden Attribute ---------- */
+.stale-indicator[hidden] {
+  display: none;
+}
+
+/* ---------- Scrollbar Styling ---------- */
+.results-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.results-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.results-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.results-container::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* ---------- Accessibility ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner,
+  .refresh-progress-bar::after,
+  .popup-container[data-state="refreshing"] .refresh-icon {
+    animation: none;
+  }
+
+  .refresh-progress-bar::after {
+    width: 100%;
+    left: 0;
+    opacity: 0.5;
+  }
+}
+
+/* ---------- High Contrast / Forced Colors ---------- */
+@media (forced-colors: active) {
+  .search-input-wrapper:focus-within {
+    border-color: Highlight;
+  }
+
+  .result-item.highlighted {
+    outline-color: Highlight;
+  }
+
+  .btn-primary {
+    border: 1px solid ButtonText;
+  }
+}
+
+
+/* ---------- Recently Viewed ---------- */
+.recently-viewed {
+  padding: 0;
+}
+
+.recently-viewed-header {
+  padding: 8px 12px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recently-viewed-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #888;
+}
+
+.recently-viewed-empty {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  padding: 16px 12px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.recent-item:hover {
+  background: #f0f7ff;
+}
+
+.recent-item-left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  margin-right: 8px;
+}
+
+.recent-item-name {
+  font-size: 13px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-item-time {
+  font-size: 10px;
+  color: #aaa;
+}
+
+.recent-item-type {
+  font-size: 11px;
+  color: #666;
+  background: #eee;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

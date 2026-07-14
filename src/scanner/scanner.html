@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Org Health Scanner - SFDC Metadata Navigator</title>
+  <link rel="stylesheet" href="scanner.css">
+</head>
+<body>
+  <div class="scanner-app">
+
+    <!-- Header -->
+    <header class="scanner-header">
+      <div class="header-left">
+        <h1 class="header-title">Org Health Scanner</h1>
+        <p class="header-subtitle">Search and select up to 5 Apex classes to analyze</p>
+      </div>
+    </header>
+
+    <!-- Search & Selection Panel (always visible unless scanning/results) -->
+    <div id="selection-panel">
+      <!-- Search Input -->
+      <div class="search-section">
+        <input id="class-search" type="text" class="class-search-input" placeholder="Type to search Apex classes..." autocomplete="off" spellcheck="false">
+        <p id="search-hint" class="search-hint">Type at least 2 characters to search</p>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div id="search-results" class="search-results" style="display:none"></div>
+
+      <!-- Suggestions: Recently Modified Classes -->
+      <div id="suggestions-section" class="suggestions-section" style="display:none"></div>
+
+      <!-- Selected Classes -->
+      <div id="selected-section" class="selected-section" style="display:none">
+        <h3 class="selected-title">Selected Classes <span id="selected-count" class="selected-count">(0/5)</span></h3>
+        <div id="selected-list" class="selected-list"></div>
+        <button id="scan-btn" class="btn btn-primary scan-btn" type="button" disabled>Scan Selected</button>
+      </div>
+
+      <!-- Error Message (inline) -->
+      <div id="error-message" class="error-inline" style="display:none">
+        <span class="error-inline-icon">&#9888;</span>
+        <span id="error-text"></span>
+      </div>
+    </div>
+
+    <!-- Scanning State -->
+    <div id="scanning-panel" class="state-panel" style="display:none">
+      <div class="scanning-spinner"></div>
+      <p id="scanning-message" class="scanning-message">Scanning...</p>
+      <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+      </div>
+      <p id="progress-text" class="progress-text"></p>
+    </div>
+
+    <!-- Results State -->
+    <div id="results-panel" style="display:none">
+
+      <!-- Back button -->
+      <div class="results-toolbar">
+        <button id="back-btn" class="btn btn-secondary" type="button">&larr; Scan More</button>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-section">
+        <div class="summary-card summary-total">
+          <div class="summary-value" id="total-classes">0</div>
+          <div class="summary-label">Scanned</div>
+        </div>
+        <div class="summary-card summary-issues">
+          <div class="summary-value" id="classes-with-issues">0</div>
+          <div class="summary-label">With Issues</div>
+        </div>
+        <div class="summary-card summary-critical">
+          <div class="summary-value" id="critical-count">0</div>
+          <div class="summary-label">Critical</div>
+        </div>
+        <div class="summary-card summary-warning">
+          <div class="summary-value" id="warning-count">0</div>
+          <div class="summary-label">Warnings</div>
+        </div>
+        <div class="summary-card summary-info">
+          <div class="summary-value" id="info-count">0</div>
+          <div class="summary-label">Info</div>
+        </div>
+      </div>
+
+      <!-- Violations List -->
+      <div id="violations-list" class="violations-list"></div>
+
+      <!-- No Issues Message -->
+      <div id="no-issues-message" class="no-issues-message" style="display:none">
+        <div class="no-issues-icon">&#10003;</div>
+        <p>No issues found in the selected classes!</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="scanner-ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,586 @@
+/* ==========================================================================
+   SFDC Metadata Navigator - Org Health Scanner Styles
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.scanner-app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ---------- Header ---------- */
+.scanner-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: #666;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: background-color 0.15s, opacity 0.15s;
+}
+
+.btn:focus-visible {
+  outline: 2px solid #1b96ff;
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #1b96ff;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #0d7de0;
+}
+
+.btn-secondary {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #d4d4d4;
+}
+
+/* ---------- Search Section ---------- */
+.search-section {
+  margin-bottom: 8px;
+}
+
+.class-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  transition: border-color 0.15s;
+}
+
+.class-search-input:focus {
+  outline: none;
+  border-color: #1b96ff;
+  box-shadow: 0 0 0 3px rgba(27, 150, 255, 0.1);
+}
+
+.search-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+}
+
+/* ---------- Search Results ---------- */
+.search-results {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background: #f0f7ff;
+}
+
+.search-result-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-result-name {
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: #333;
+}
+
+.search-result-type {
+  font-size: 11px;
+  color: #888;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.search-result-added {
+  font-size: 11px;
+  color: #27ae60;
+  font-weight: 500;
+}
+
+.search-no-results {
+  padding: 16px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}
+
+.search-loading {
+  padding: 16px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}
+
+/* ---------- Selected Classes ---------- */
+.selected-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.selected-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.selected-count {
+  font-weight: 400;
+  color: #888;
+}
+
+.selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #edf5ff;
+  border: 1px solid #c4dcf5;
+  border-radius: 16px;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: #1a5a8a;
+}
+
+.selected-chip-remove {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.selected-chip-remove:hover {
+  color: #e74c3c;
+}
+
+.scan-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 8px;
+}
+
+/* ---------- Error Inline ---------- */
+.error-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.error-inline-icon {
+  font-size: 16px;
+}
+
+/* ---------- Scanning State ---------- */
+.state-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.scanning-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #1b96ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.scanning-message {
+  font-size: 15px;
+  color: #444;
+  margin-bottom: 16px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  max-width: 400px;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #1b96ff;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #888;
+}
+
+/* ---------- Results ---------- */
+.results-toolbar {
+  margin-bottom: 16px;
+}
+
+.summary-section {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 14px 10px;
+  text-align: center;
+  border: 1px solid #e8e8e8;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.summary-label {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.summary-total .summary-value { color: #333; }
+.summary-issues .summary-value { color: #e67e22; }
+.summary-critical .summary-value { color: #e74c3c; }
+.summary-warning .summary-value { color: #f39c12; }
+.summary-info .summary-value { color: #3498db; }
+
+/* ---------- Violations ---------- */
+.violations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.violation-class {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+}
+
+.violation-class-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+  cursor: pointer;
+}
+
+.violation-class-header:hover {
+  background: #f0f4ff;
+}
+
+.class-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+.class-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.class-badge.critical { background: #e74c3c; }
+.class-badge.warning { background: #f39c12; }
+.class-badge.info { background: #3498db; }
+
+.violation-items { padding: 0; }
+
+.violation-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.violation-item:last-child { border-bottom: none; }
+
+.violation-severity-badge {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+.violation-severity-badge.critical { background: #e74c3c; }
+.violation-severity-badge.warning { background: #f39c12; }
+.violation-severity-badge.info { background: #3498db; }
+
+.violation-content { flex: 1; min-width: 0; }
+
+.violation-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.violation-location {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.violation-snippet {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 11px;
+  background: #f8f8f8;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  overflow-x: auto;
+  white-space: pre;
+  color: #555;
+}
+
+.violation-fix {
+  font-size: 12px;
+  color: #27ae60;
+}
+
+/* ---------- No Issues ---------- */
+.no-issues-message {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.no-issues-icon {
+  font-size: 48px;
+  color: #27ae60;
+  margin-bottom: 12px;
+}
+
+.no-issues-message p {
+  font-size: 15px;
+  color: #555;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 600px) {
+  .summary-section {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+
+/* ---------- Suggestions (Recently Modified) ---------- */
+.suggestions-section {
+  margin-bottom: 16px;
+}
+
+.suggestions-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #888;
+  padding: 8px 0 6px;
+}
+
+.suggestions-loading {
+  font-size: 12px;
+  color: #999;
+  padding: 8px 0;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: #f5f9ff;
+}
+
+.suggestion-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.suggestion-item.selected {
+  background: #edf5ff;
+}
+
+.suggestion-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.suggestion-name {
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-time {
+  font-size: 11px;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.suggestion-badge {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.suggestion-badge.new {
+  background: #d4edda;
+  color: #155724;
+}
+
+.suggestion-add {
+  font-size: 12px;
+  color: #1b96ff;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.suggestion-added {
+  font-size: 11px;
+  color: #27ae60;
+  font-weight: 500;
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Org Info - SFDC Metadata Navigator</title>
+  <link rel="stylesheet" href="orginfo.css">
+</head>
+<body>
+  <div class="orginfo-app">
+
+    <header class="orginfo-header">
+      <h1 class="header-title">Org Info Dashboard</h1>
+      <button id="refresh-btn" class="btn btn-primary" type="button">Refresh</button>
+    </header>
+
+    <!-- Loading -->
+    <div id="loading-panel" class="loading-panel">
+      <div class="spinner"></div>
+      <p>Loading org information...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error-panel" class="error-panel" style="display:none">
+      <span class="error-icon">&#9888;</span>
+      <span id="error-text">Failed to load org info.</span>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" style="display:none">
+
+      <!-- Org Identity -->
+      <section class="card">
+        <h2 class="card-title">Organization</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Org Name</span>
+            <span class="info-value" id="org-name">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Org ID</span>
+            <span class="info-value mono" id="org-id">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Org Type</span>
+            <span class="info-value" id="org-type">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Instance</span>
+            <span class="info-value" id="org-instance">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">API Version</span>
+            <span class="info-value" id="api-version">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Namespace Prefix</span>
+            <span class="info-value mono" id="org-namespace">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Current User -->
+      <section class="card">
+        <h2 class="card-title">Current User</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Name</span>
+            <span class="info-value" id="user-name">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Username</span>
+            <span class="info-value mono" id="user-username">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value" id="user-email">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Profile</span>
+            <span class="info-value" id="user-profile">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Role</span>
+            <span class="info-value" id="user-role">—</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">User ID</span>
+            <span class="info-value mono" id="user-id">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- API Limits -->
+      <section class="card">
+        <h2 class="card-title">API Limits (24h)</h2>
+        <div id="limits-grid" class="limits-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- Storage -->
+      <section class="card">
+        <h2 class="card-title">Storage</h2>
+        <div id="storage-grid" class="limits-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="orginfo.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SFDC Metadata Navigator - Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <header class="settings-header">
+      <h1>Settings</h1>
+      <p class="settings-subtitle">Choose which metadata types to include in search results.</p>
+    </header>
+
+    <section class="metadata-types" aria-labelledby="metadata-types-heading">
+      <h2 id="metadata-types-heading">Metadata Types</h2>
+      <ul class="checkbox-list" role="group" aria-label="Metadata types to search">
+        <li class="checkbox-item">
+          <label for="type-profile">
+            <input type="checkbox" id="type-profile" value="Profile" checked>
+            <span class="checkbox-label">Profiles</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-permissionset">
+            <input type="checkbox" id="type-permissionset" value="PermissionSet" checked>
+            <span class="checkbox-label">Permission Sets</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-flow">
+            <input type="checkbox" id="type-flow" value="Flow" checked>
+            <span class="checkbox-label">Flows</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-emailtemplate">
+            <input type="checkbox" id="type-emailtemplate" value="EmailTemplate" checked>
+            <span class="checkbox-label">Email Templates</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-layout">
+            <input type="checkbox" id="type-layout" value="Layout" checked>
+            <span class="checkbox-label">Page Layouts</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-validationrule">
+            <input type="checkbox" id="type-validationrule" value="ValidationRule" checked>
+            <span class="checkbox-label">Validation Rules</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-apexclass">
+            <input type="checkbox" id="type-apexclass" value="ApexClass" checked>
+            <span class="checkbox-label">Apex Classes</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-apextrigger">
+            <input type="checkbox" id="type-apextrigger" value="ApexTrigger" checked>
+            <span class="checkbox-label">Apex Triggers</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-custommetadata">
+            <input type="checkbox" id="type-custommetadata" value="CustomMetadata" checked>
+            <span class="checkbox-label">Custom Metadata Types</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-user">
+            <input type="checkbox" id="type-user" value="User">
+            <span class="checkbox-label">Users (max 1000, sorted by recent login)</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-customlabel">
+            <input type="checkbox" id="type-customlabel" value="CustomLabel" checked>
+            <span class="checkbox-label">Custom Labels</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-namedcredential">
+            <input type="checkbox" id="type-namedcredential" value="NamedCredential" checked>
+            <span class="checkbox-label">Named Credentials</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-remotesitesetting">
+            <input type="checkbox" id="type-remotesitesetting" value="RemoteSiteSetting" checked>
+            <span class="checkbox-label">Remote Site Settings</span>
+          </label>
+        </li>
+        <li class="checkbox-item">
+          <label for="type-connectedapp">
+            <input type="checkbox" id="type-connectedapp" value="ConnectedApp" checked>
+            <span class="checkbox-label">Connected Apps</span>
+          </label>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="settings-footer">
+      <button id="save-btn" type="button" class="save-button">Save Settings</button>
+      <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+    </footer>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

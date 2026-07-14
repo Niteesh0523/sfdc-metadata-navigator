@@ -1,0 +1,25 @@
+{
+  "name": "sfdc-metadata-navigator-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension for instant search and navigation to Salesforce metadata items",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:check": "tsc --noEmit",
+    "icons": "node scripts/generate-icons.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "fuse.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/jest": "^29.5.12",
+    "esbuild": "^0.28.1",
+    "fast-check": "^3.19.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.4",
+    "typescript": "^5.4.5"
+  }
+}

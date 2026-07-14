@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SFDC Metadata Navigator</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="popup-container" class="popup-container" data-state="checking-org">
+
+    <!-- Loading state: checking org -->
+    <div class="state-view state-checking-org">
+      <div class="loading-spinner"></div>
+      <p class="loading-message">Checking Salesforce org...</p>
+    </div>
+
+    <!-- Not on Salesforce state -->
+    <div class="state-view state-not-salesforce">
+      <div class="info-icon">&#9432;</div>
+      <p class="info-message">This extension works only on Salesforce org pages.</p>
+      <p class="info-hint">Navigate to a Salesforce page to use the Metadata Navigator.</p>
+    </div>
+
+    <!-- Loading index state -->
+    <div class="state-view state-loading-index">
+      <div class="loading-spinner"></div>
+      <p class="loading-message">Loading metadata index...</p>
+    </div>
+
+    <!-- No index state -->
+    <div class="state-view state-no-index">
+      <div class="info-icon">&#128269;</div>
+      <p class="info-message">No metadata cached for this org.</p>
+      <p class="info-hint">Click Refresh to build the search index.</p>
+      <button id="no-index-refresh-btn" class="btn btn-primary" type="button">
+        <span class="refresh-icon">&#8635;</span> Refresh Index
+      </button>
+    </div>
+
+    <!-- Ready / Searching / Refreshing states -->
+    <div class="state-view state-ready">
+      <!-- Search input -->
+      <div class="search-section">
+        <div class="search-input-wrapper">
+          <span class="search-icon">&#128269;</span>
+          <input
+            id="search-input"
+            type="text"
+            class="search-input"
+            placeholder="Search metadata..."
+            autofocus
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+
+      <!-- Refresh bar -->
+      <div class="refresh-bar">
+        <div class="refresh-info">
+          <span id="last-refreshed" class="last-refreshed">Last refreshed: --</span>
+          <span id="stale-indicator" class="stale-indicator" hidden>&#9888; Stale</span>
+        </div>
+        <button id="refresh-btn" class="btn btn-icon" type="button" title="Refresh metadata index">
+          <span class="refresh-icon">&#8635;</span>
+        </button>
+      </div>
+
+      <!-- Refreshing progress indicator -->
+      <div id="refresh-progress" class="refresh-progress" hidden>
+        <div class="refresh-progress-bar"></div>
+        <span class="refresh-progress-text">Refreshing...</span>
+      </div>
+
+      <!-- Results list -->
+      <div id="results-container" class="results-container">
+        <ul id="results-list" class="results-list" role="listbox" aria-label="Search results"></ul>
+        <p id="no-results-message" class="no-results-message" hidden>No results found.</p>
+
+        <!-- Recently Viewed (shown when search is empty) -->
+        <div id="recently-viewed" class="recently-viewed">
+          <div class="recently-viewed-header">
+            <span class="recently-viewed-title">Recently Viewed</span>
+          </div>
+          <ul id="recently-viewed-list" class="results-list" role="list" aria-label="Recently viewed records"></ul>
+          <p id="recently-viewed-empty" class="recently-viewed-empty" hidden>No recent records.</p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="popup-footer">
+        <a id="settings-link" class="settings-link" href="#" title="Extension settings">
+          <span class="settings-icon">&#9881;</span> Settings
+        </a>
+        <a id="field-inspector-link" class="settings-link" href="#" title="Inspect fields on the current page">
+          <span class="settings-icon">&#128270;</span> Field Inspector
+        </a>
+        <a id="orginfo-link" class="settings-link" href="#" title="Org info dashboard">
+          <span class="settings-icon">&#9432;</span> Org Info
+        </a>
+        <a id="scanner-link" class="settings-link" href="#" title="Scan org for code issues">
+          <span class="settings-icon">&#128269;</span> Scan
+        </a>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div class="state-view state-error">
+      <div class="error-icon">&#9888;</div>
+      <p id="error-message" class="error-message">An error occurred.</p>
+      <button id="error-dismiss-btn" class="btn btn-secondary" type="button">Dismiss</button>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
