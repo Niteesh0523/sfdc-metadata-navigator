@@ -53,6 +53,7 @@ let errorMessageEl: HTMLElement;
 let errorDismissBtn: HTMLElement;
 let settingsLink: HTMLElement;
 let scannerLink: HTMLElement;
+let permCheckerLink: HTMLElement;
 let orginfoLink: HTMLElement;
 let fieldInspectorLink: HTMLElement;
 
@@ -100,6 +101,7 @@ async function init(): Promise<void> {
   errorDismissBtn = document.getElementById('error-dismiss-btn')!;
   settingsLink = document.getElementById('settings-link')!;
   scannerLink = document.getElementById('scanner-link')!;
+  permCheckerLink = document.getElementById('perm-checker-link')!;
   orginfoLink = document.getElementById('orginfo-link')!;
   fieldInspectorLink = document.getElementById('field-inspector-link')!;
 
@@ -114,6 +116,7 @@ async function init(): Promise<void> {
   errorDismissBtn.addEventListener('click', handleErrorDismiss);
   settingsLink.addEventListener('click', handleSettingsClick);
   scannerLink.addEventListener('click', handleScannerClick);
+  permCheckerLink.addEventListener('click', handlePermCheckerClick);
   orginfoLink.addEventListener('click', handleOrginfoClick);
   fieldInspectorLink.addEventListener('click', handleFieldInspectorClick);
 
@@ -551,6 +554,14 @@ function handleScannerClick(event: Event): void {
 function handleOrginfoClick(event: Event): void {
   event.preventDefault();
   chrome.tabs.create({ url: chrome.runtime.getURL('orginfo/orginfo.html') });
+}
+
+/**
+ * Opens the Perm Checker page in a new tab.
+ */
+function handlePermCheckerClick(event: Event): void {
+  event.preventDefault();
+  chrome.tabs.create({ url: chrome.runtime.getURL('perm-checker/perm-checker.html') });
 }
 
 /**
