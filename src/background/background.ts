@@ -20,6 +20,14 @@ import {
   ServerError,
   ApiTimeoutError,
 } from './api';
+import {
+  searchUsers,
+  searchProfiles,
+  getProfilePermissionSetId,
+  getAssignedPermissionSets,
+  getPermissionSetLicenseAssignments,
+  getObjectAndFieldPermissions,
+} from '../perm-checker/perm-queries';
 
 // ---------------------------------------------------------------------------
 // Error Categorization
@@ -665,6 +673,114 @@ async function handleGetFileTypeObjects(fileType: string): Promise<any> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Perm Checker Handlers
+// ---------------------------------------------------------------------------
+
+async function handleSearchUsers(query: string): Promise<any> {
+  const sessionInfo = await getScannerSession();
+  if (!sessionInfo) return { error: 'No Salesforce session available.' };
+  try {
+    const users = await searchUsers(`https://${sessionInfo.apiHost}`, sessionInfo.sessionId, query);
+    return { users };
+  } catch (error: unknown) {
+    return { error: categorizeError(error) };
+  }
+}
+
+async function handleSearchProfiles(query: string): Promise<any> {
+  const sessionInfo = await getScannerSession();
+  if (!sessionInfo) return { error: 'No Salesforce session available.' };
+  try {
+    const profiles = await searchProfiles(`https://${sessionInfo.apiHost}`, sessionInfo.sessionId, query);
+    return { profiles };
+  } catch (error: unknown) {
+    return { error: categorizeError(error) };
+  }
+}
+
+/**
+ * Searches SObjects by name/label substring via a fresh /sobjects describe
+ * call. Deliberately not sharing getKeyPrefixMap's cache — that map is keyed
+ * by 3-char key prefix (for resolving record IDs to object names), not by
+ * searchable name/label, so reusing it would need its own lookup structure.
+ * Not worth the complexity for a search box the user runs a handful of times.
+ */
+async function handleSearchObjects(query: string): Promise<any> {
+  const sessionInfo = await getScannerSession();
+  if (!sessionInfo) return { error: 'No Salesforce session available.' };
+
+  const baseUrl = `https://${sessionInfo.apiHost}`;
+  try {
+    const data = await fetchJson(`${baseUrl}/services/data/v59.0/sobjects`, sessionInfo.sessionId);
+    const lowerQuery = query.toLowerCase();
+    const objects = (data?.sobjects || [])
+      .filter((o: any) => o.queryable)
+      .map((o: any) => ({ apiName: o.name as string, label: o.label as string }))
+      .filter((o: { apiName: string; label: string }) =>
+        o.apiName.toLowerCase().includes(lowerQuery) || o.label.toLowerCase().includes(lowerQuery)
+      )
+      .slice(0, 20);
+    return { objects };
+  } catch {
+    return { error: 'Failed to load objects.' };
+  }
+}
+
+async function handleGetProfilePermissionSetId(profileId: string): Promise<any> {
+  const sessionInfo = await getScannerSession();
+  if (!sessionInfo) return { error: 'No Salesforce session available.' };
+  try {
+    const permSetId = await getProfilePermissionSetId(`https://${sessionInfo.apiHost}`, sessionInfo.sessionId, profileId);
+    return { permSetId };
+  } catch (error: unknown) {
+    return { error: categorizeError(error) };
+  }
+}
+
+async function handleGetAssignedPermissionSets(userId: string): Promise<any> {
+  const sessionInfo = await getScannerSession();
+  if (!sessionInfo) return { error: 'No Salesforce session available.' };
+  try {
+    const permissionSets = await getAssignedPermissionSets(`https://${sessionInfo.apiHost}`, sessionInfo.sessionId, userId);
+    return { permissionSets };
+  } catch (error: unknown) {
+    return { error: categorizeError(error) };
+  }
+}
+
+async function handleGetPermissionSetLicenseAssignments(userId: string): Promise<any> {
+  const sessionInfo = await getScannerSession();
+  if (!sessionInfo) return { error: 'No Salesforce session available.' };
+  try {
+    const licenseIds = await getPermissionSetLicenseAssignments(`https://${sessionInfo.apiHost}`, sessionInfo.sessionId, userId);
+    return { licenseIds: Array.from(licenseIds) };
+  } catch (error: unknown) {
+    return { error: categorizeError(error) };
+  }
+}
+
+async function handleGetObjectAndFieldPermissions(
+  permissionSetIds: string[],
+  objectApiName: string,
+  fieldApiName: string | null
+): Promise<any> {
+  const sessionInfo = await getScannerSession();
+  if (!sessionInfo) return { error: 'No Salesforce session available.' };
+  try {
+    const result = await getObjectAndFieldPermissions(
+      `https://${sessionInfo.apiHost}`,
+      sessionInfo.sessionId,
+      permissionSetIds,
+      objectApiName,
+      fieldApiName
+    );
+    return result;
+  } catch (error: unknown) {
+    return { error: categorizeError(error) };
+  }
+}
+
 /**
  * Gets a mapping of key prefix → object label by querying /sobjects.
  * Caches the result in chrome.storage.local for persistence across service worker restarts.
@@ -1263,6 +1379,59 @@ chrome.runtime.onMessage.addListener(
           const msg = error instanceof Error ? error.message : 'Scan failed';
           sendResponse({ error: msg });
         });
+      return true;
+    }
+
+    if ((message as any).action === 'searchUsers') {
+      handleSearchUsers((message as any).query)
+        .then(sendResponse)
+        .catch(() => sendResponse({ error: 'Search failed' }));
+      return true;
+    }
+
+    if ((message as any).action === 'searchProfiles') {
+      handleSearchProfiles((message as any).query)
+        .then(sendResponse)
+        .catch(() => sendResponse({ error: 'Search failed' }));
+      return true;
+    }
+
+    if ((message as any).action === 'searchObjects') {
+      handleSearchObjects((message as any).query)
+        .then(sendResponse)
+        .catch(() => sendResponse({ error: 'Search failed' }));
+      return true;
+    }
+
+    if ((message as any).action === 'getProfilePermissionSetId') {
+      handleGetProfilePermissionSetId((message as any).profileId)
+        .then(sendResponse)
+        .catch(() => sendResponse({ error: 'Failed to resolve profile' }));
+      return true;
+    }
+
+    if ((message as any).action === 'getAssignedPermissionSets') {
+      handleGetAssignedPermissionSets((message as any).userId)
+        .then(sendResponse)
+        .catch(() => sendResponse({ error: 'Failed to load permission sets' }));
+      return true;
+    }
+
+    if ((message as any).action === 'getPermissionSetLicenseAssignments') {
+      handleGetPermissionSetLicenseAssignments((message as any).userId)
+        .then(sendResponse)
+        .catch(() => sendResponse({ error: 'Failed to load license assignments' }));
+      return true;
+    }
+
+    if ((message as any).action === 'getObjectAndFieldPermissions') {
+      handleGetObjectAndFieldPermissions(
+        (message as any).permissionSetIds,
+        (message as any).objectApiName,
+        (message as any).fieldApiName
+      )
+        .then(sendResponse)
+        .catch(() => sendResponse({ error: 'Failed to load permissions' }));
       return true;
     }
 
