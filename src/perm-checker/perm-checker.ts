@@ -286,6 +286,7 @@ async function runCheck(): Promise<void> {
 
       if (profileResp?.error) { showError(profileResp.error); return; }
       if (assignedResp?.error) { showError(assignedResp.error); return; }
+      if (licenseResp?.error) { showError(licenseResp.error); return; }
 
       const assignedLicenseIds = new Set<string>(licenseResp?.licenseIds || []);
 
