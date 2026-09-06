@@ -59,3 +59,53 @@ export async function searchProfiles(
 
   return records.map((r: any) => ({ id: r.Id, name: r.Name }));
 }
+
+// ---------------------------------------------------------------------------
+// Permission Set Resolution
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolves the Id of the PermissionSet that Salesforce automatically creates
+ * for a Profile (PermissionSet.ProfileId = profileId, IsOwnedByProfile = true).
+ * This is NOT reachable via PermissionSetAssignment — it must be queried directly.
+ */
+export async function getProfilePermissionSetId(
+  instanceUrl: string,
+  sessionId: string,
+  profileId: string
+): Promise<string | null> {
+  const escaped = escapeSoqlString(profileId);
+  const soql = `SELECT Id FROM PermissionSet WHERE ProfileId = '${escaped}' LIMIT 1`;
+  const records = await queryRestApi(instanceUrl, sessionId, soql);
+  return records.length > 0 ? (records[0] as any).Id : null;
+}
+
+export interface AssignedPermissionSet {
+  permSetId: string;
+  label: string;
+  licenseId: string | null;
+  licenseName: string | null;
+}
+
+/**
+ * Returns the user's directly-assigned Permission Sets (excludes Permission Set
+ * Group-derived assignments and the profile-owned Permission Set, which is
+ * resolved separately via getProfilePermissionSetId). Permission Set Groups and
+ * Muting Permission Sets are out of scope for v1 (see plan Global Constraints).
+ */
+export async function getAssignedPermissionSets(
+  instanceUrl: string,
+  sessionId: string,
+  userId: string
+): Promise<AssignedPermissionSet[]> {
+  const escaped = escapeSoqlString(userId);
+  const soql = `SELECT PermissionSetId, PermissionSet.Label, PermissionSet.LicenseId, PermissionSet.License.Name FROM PermissionSetAssignment WHERE AssigneeId = '${escaped}' AND PermissionSetGroupId = null AND PermissionSet.IsOwnedByProfile = false`;
+  const records = await queryRestApi(instanceUrl, sessionId, soql);
+
+  return records.map((r: any) => ({
+    permSetId: r.PermissionSetId,
+    label: r.PermissionSet?.Label ?? '',
+    licenseId: r.PermissionSet?.LicenseId ?? null,
+    licenseName: r.PermissionSet?.License?.Name ?? null,
+  }));
+}
