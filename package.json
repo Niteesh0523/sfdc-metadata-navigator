@@ -1,6 +1,6 @@
 {
   "name": "sfdc-metadata-navigator-extension",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Chrome extension for instant search and navigation to Salesforce metadata items",
   "private": true,
   "scripts": {
