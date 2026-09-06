@@ -2,6 +2,14 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/*
+ * The browser's default [hidden] rule (display: none) is NOT !important, so any
+ * class below that sets its own `display` (.chip, .loading-panel, .error-panel)
+ * silently wins over it once matched, leaving the element stuck visible forever
+ * even after JS sets hidden = true again. Force hidden to always win.
+ */
+[hidden] { display: none !important; }
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 14px;
