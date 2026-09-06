@@ -177,8 +177,8 @@ function init(): void {
       }
       return (response?.profiles || []).map((p: any) => ({ id: p.id, label: p.name }));
     },
-    onSelect: (item) => { pickedEntity = item; updateCheckButtonState(); },
-    onClear: () => { pickedEntity = null; updateCheckButtonState(); },
+    onSelect: (item) => { pickedEntity = item; clearResults(); updateCheckButtonState(); },
+    onClear: () => { pickedEntity = null; clearResults(); updateCheckButtonState(); },
   });
 
   objectPicker = new SearchPicker({
@@ -196,6 +196,7 @@ function init(): void {
       pickedField = null;
       fieldPicker.clear();
       fieldPicker.setEnabled(true);
+      clearResults();
       updateCheckButtonState();
     },
     onClear: () => {
@@ -203,6 +204,7 @@ function init(): void {
       pickedField = null;
       fieldPicker.clear();
       fieldPicker.setEnabled(false);
+      clearResults();
       updateCheckButtonState();
     },
   });
@@ -222,12 +224,17 @@ function init(): void {
         .slice(0, 20)
         .map((f: any) => ({ id: f.apiName, label: `${f.label} (${f.apiName})` }));
     },
-    onSelect: (item) => { pickedField = item; },
-    onClear: () => { pickedField = null; },
+    onSelect: (item) => { pickedField = item; clearResults(); },
+    onClear: () => { pickedField = null; clearResults(); },
   });
   fieldPicker.setEnabled(false);
 
   document.getElementById('check-access-btn')!.addEventListener('click', () => runCheck());
+}
+
+/** Hides the results panel. Called whenever the picked entity/object/field selection changes, so a stale result from a prior selection is never shown alongside a new one. */
+function clearResults(): void {
+  document.getElementById('results-panel')!.hidden = true;
 }
 
 function setMode(newMode: Mode): void {
@@ -245,7 +252,7 @@ function setMode(newMode: Mode): void {
   // Object/Field selections are preserved per the design.
   entityPicker.clear();
   pickedEntity = null;
-  document.getElementById('results-panel')!.hidden = true;
+  clearResults();
   updateCheckButtonState();
 }
 
@@ -290,10 +297,9 @@ async function runCheck(): Promise<void> {
 
       const assignedLicenseIds = new Set<string>(licenseResp?.licenseIds || []);
 
-      if (profileResp?.permSetId) {
-        permissionSetIds.push(profileResp.permSetId);
-        sourceMeta.set(profileResp.permSetId, { label: `Profile: ${pickedEntity.profileName}`, isOwnedByProfile: true });
-      }
+      if (!profileResp?.permSetId) { showError("Could not resolve this user's Profile permission set."); return; }
+      permissionSetIds.push(profileResp.permSetId);
+      sourceMeta.set(profileResp.permSetId, { label: `Profile: ${pickedEntity.profileName}`, isOwnedByProfile: true });
 
       for (const ps of (assignedResp?.permissionSets || [])) {
         permissionSetIds.push(ps.permSetId);
@@ -374,14 +380,22 @@ function renderResults(
   }
 
   if (result.effective.fieldRead !== null) {
+    const notGoverned = !result.effective.fieldGoverned;
+    const readBadge = notGoverned
+      ? '<span class="perm-na">N/A (not FLS-governed)</span>'
+      : permBadge(result.effective.fieldRead);
+    const editBadge = notGoverned
+      ? '<span class="perm-na">N/A (not FLS-governed)</span>'
+      : permBadge(result.effective.fieldEdit);
+
     const readCell = document.createElement('div');
     readCell.className = 'perm-cell';
-    readCell.innerHTML = `<span>Field Read</span>${permBadge(result.effective.fieldRead)}`;
+    readCell.innerHTML = `<span>Field Read</span>${readBadge}`;
     grid.appendChild(readCell);
 
     const editCell = document.createElement('div');
     editCell.className = 'perm-cell';
-    editCell.innerHTML = `<span>Field Edit</span>${permBadge(result.effective.fieldEdit)}`;
+    editCell.innerHTML = `<span>Field Edit</span>${editBadge}`;
     grid.appendChild(editCell);
   }
 
@@ -416,6 +430,8 @@ function renderBreakdown(
       ? `<span class="license-badge ${license.assigned ? 'assigned' : 'missing'}">${escapeHtml(license.licenseName)}${license.assigned ? '' : ' (not assigned)'}</span>`
       : '';
     const profileBadgeHtml = source.isProfile ? '<span class="profile-badge">Profile</span>' : '';
+    const fieldReadBadge = source.fieldGoverned ? permBadge(source.fieldRead) : '<span class="perm-na">N/A</span>';
+    const fieldEditBadge = source.fieldGoverned ? permBadge(source.fieldEdit) : '<span class="perm-na">N/A</span>';
 
     row.innerHTML = `
       <span class="source-name">${escapeHtml(source.label)}${profileBadgeHtml}${licenseHtml}</span>
@@ -425,8 +441,8 @@ function renderBreakdown(
       ${permBadge(source.delete)}
       ${permBadge(source.viewAll)}
       ${permBadge(source.modifyAll)}
-      ${showFieldCols ? permBadge(source.fieldRead) : ''}
-      ${showFieldCols ? permBadge(source.fieldEdit) : ''}
+      ${showFieldCols ? fieldReadBadge : ''}
+      ${showFieldCols ? fieldEditBadge : ''}
     `;
     container.appendChild(row);
   }

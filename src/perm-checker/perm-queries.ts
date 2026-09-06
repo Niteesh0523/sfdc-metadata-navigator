@@ -11,7 +11,7 @@ import { queryRestApi } from '../background/api';
 import { ObjectPermissionRow, FieldPermissionRow } from './aggregate';
 
 function escapeSoqlString(value: string): string {
-  return value.replace(/'/g, "\\'");
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 // ---------------------------------------------------------------------------

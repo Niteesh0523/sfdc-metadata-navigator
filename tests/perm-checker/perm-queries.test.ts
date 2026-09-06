@@ -30,6 +30,17 @@ describe('searchUsers', () => {
     const soql = mockedQueryRestApi.mock.calls[0][2];
     expect(soql).toContain("O\\'Brien");
   });
+
+  it('escapes backslashes before quotes so a trailing backslash cannot escape an added quote-escape', async () => {
+    mockedQueryRestApi.mockResolvedValue([]);
+
+    await searchUsers('https://acme.my.salesforce.com', 'sess', "foo\\");
+
+    const soql = mockedQueryRestApi.mock.calls[0][2];
+    // "foo\" must become "foo\\" (escaped backslash) with the surrounding
+    // quote from the LIKE '%...%' template still closing the literal.
+    expect(soql).toContain("LIKE '%foo\\\\%'");
+  });
 });
 
 describe('searchProfiles', () => {
