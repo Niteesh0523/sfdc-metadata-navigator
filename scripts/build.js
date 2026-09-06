@@ -88,6 +88,13 @@ async function bundleEntryPoints() {
     outfile: path.join(BUILD_DIR, 'js/field-inspector/field-inspector.js'),
   });
 
+  // Perm Checker script
+  await esbuild.build({
+    ...commonOptions,
+    entryPoints: [path.join(ROOT, 'src/perm-checker/perm-checker.ts')],
+    outfile: path.join(BUILD_DIR, 'perm-checker/perm-checker.js'),
+  });
+
   console.log('  Bundled all entry points.');
 }
 
@@ -160,6 +167,18 @@ function copyStaticAssets() {
   fs.copyFileSync(
     path.join(ROOT, 'src/orginfo/orginfo.css'),
     path.join(orginfoDir, 'orginfo.css')
+  );
+
+  // Perm Checker HTML and CSS
+  const permCheckerDir = path.join(BUILD_DIR, 'perm-checker');
+  fs.mkdirSync(permCheckerDir, { recursive: true });
+  fs.copyFileSync(
+    path.join(ROOT, 'src/perm-checker/perm-checker.html'),
+    path.join(permCheckerDir, 'perm-checker.html')
+  );
+  fs.copyFileSync(
+    path.join(ROOT, 'src/perm-checker/perm-checker.css'),
+    path.join(permCheckerDir, 'perm-checker.css')
   );
 
   console.log('  Copied static assets.');
