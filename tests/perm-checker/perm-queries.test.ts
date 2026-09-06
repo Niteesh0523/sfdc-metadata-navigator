@@ -1,5 +1,5 @@
 import { queryRestApi } from '../../src/background/api';
-import { searchUsers, searchProfiles, getProfilePermissionSetId, getAssignedPermissionSets } from '../../src/perm-checker/perm-queries';
+import { searchUsers, searchProfiles, getProfilePermissionSetId, getAssignedPermissionSets, getPermissionSetLicenseAssignments, getObjectAndFieldPermissions } from '../../src/perm-checker/perm-queries';
 
 jest.mock('../../src/background/api', () => ({
   queryRestApi: jest.fn(),
@@ -105,5 +105,81 @@ describe('getAssignedPermissionSets', () => {
 
     expect(result[0].licenseId).toBeNull();
     expect(result[0].licenseName).toBeNull();
+  });
+});
+
+describe('getPermissionSetLicenseAssignments', () => {
+  beforeEach(() => mockedQueryRestApi.mockReset());
+
+  it('returns a Set of assigned PermissionSetLicenseIds', async () => {
+    mockedQueryRestApi.mockResolvedValue([
+      { PermissionSetLicenseId: '1000000000001AAA' },
+      { PermissionSetLicenseId: '1000000000002AAA' },
+    ] as any);
+
+    const result = await getPermissionSetLicenseAssignments('https://acme.my.salesforce.com', 'sess', '005000000000001');
+
+    expect(result).toEqual(new Set(['1000000000001AAA', '1000000000002AAA']));
+  });
+
+  it('returns an empty Set when the user has no license assignments', async () => {
+    mockedQueryRestApi.mockResolvedValue([]);
+
+    const result = await getPermissionSetLicenseAssignments('https://acme.my.salesforce.com', 'sess', '005000000000001');
+
+    expect(result.size).toBe(0);
+  });
+});
+
+describe('getObjectAndFieldPermissions', () => {
+  beforeEach(() => mockedQueryRestApi.mockReset());
+
+  it('maps ObjectPermissions records to ObjectPermissionRow', async () => {
+    mockedQueryRestApi.mockResolvedValueOnce([
+      {
+        ParentId: 'ps1', Parent: { Label: 'Profile: Standard', IsOwnedByProfile: true },
+        PermissionsCreate: false, PermissionsRead: true, PermissionsEdit: false,
+        PermissionsDelete: false, PermissionsViewAllRecords: false, PermissionsModifyAllRecords: false,
+      },
+    ] as any);
+
+    const result = await getObjectAndFieldPermissions(
+      'https://acme.my.salesforce.com', 'sess', ['ps1'], 'Account', null
+    );
+
+    expect(result.objectRows).toEqual([
+      { parentId: 'ps1', parentLabel: 'Profile: Standard', isOwnedByProfile: true, create: false, read: true, edit: false, delete: false, viewAll: false, modifyAll: false },
+    ]);
+    expect(result.fieldRows).toBeNull();
+    // Only the ObjectPermissions query should run when no field is given
+    expect(mockedQueryRestApi).toHaveBeenCalledTimes(1);
+  });
+
+  it('also queries FieldPermissions when a field is given, scoped to Object.Field', async () => {
+    mockedQueryRestApi
+      .mockResolvedValueOnce([
+        { ParentId: 'ps1', Parent: { Label: 'Profile: Standard', IsOwnedByProfile: true }, PermissionsCreate: false, PermissionsRead: true, PermissionsEdit: false, PermissionsDelete: false, PermissionsViewAllRecords: false, PermissionsModifyAllRecords: false },
+      ] as any)
+      .mockResolvedValueOnce([
+        { ParentId: 'ps1', PermissionsRead: true, PermissionsEdit: false },
+      ] as any);
+
+    const result = await getObjectAndFieldPermissions(
+      'https://acme.my.salesforce.com', 'sess', ['ps1'], 'Account', 'Industry'
+    );
+
+    expect(result.fieldRows).toEqual([{ parentId: 'ps1', read: true, edit: false }]);
+    expect(mockedQueryRestApi).toHaveBeenCalledTimes(2);
+    const fieldSoql = mockedQueryRestApi.mock.calls[1][2];
+    expect(fieldSoql).toContain("Field = 'Account.Industry'");
+  });
+
+  it('builds the ParentId IN (...) clause from all provided PermissionSet IDs', async () => {
+    mockedQueryRestApi.mockResolvedValue([]);
+
+    await getObjectAndFieldPermissions('https://acme.my.salesforce.com', 'sess', ['ps1', 'ps2'], 'Account', null);
+
+    const soql = mockedQueryRestApi.mock.calls[0][2];
+    expect(soql).toContain("ParentId IN ('ps1','ps2')");
   });
 });

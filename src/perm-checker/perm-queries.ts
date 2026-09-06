@@ -8,6 +8,7 @@
  */
 
 import { queryRestApi } from '../background/api';
+import { ObjectPermissionRow, FieldPermissionRow } from './aggregate';
 
 function escapeSoqlString(value: string): string {
   return value.replace(/'/g, "\\'");
@@ -108,4 +109,70 @@ export async function getAssignedPermissionSets(
     licenseId: r.PermissionSet?.LicenseId ?? null,
     licenseName: r.PermissionSet?.License?.Name ?? null,
   }));
+}
+
+// ---------------------------------------------------------------------------
+// Permission Set License Assignments (informational only — see plan's Global Constraints)
+// ---------------------------------------------------------------------------
+
+export async function getPermissionSetLicenseAssignments(
+  instanceUrl: string,
+  sessionId: string,
+  userId: string
+): Promise<Set<string>> {
+  const escaped = escapeSoqlString(userId);
+  const soql = `SELECT PermissionSetLicenseId FROM PermissionSetLicenseAssign WHERE AssigneeId = '${escaped}'`;
+  const records = await queryRestApi(instanceUrl, sessionId, soql);
+  return new Set(records.map((r: any) => r.PermissionSetLicenseId as string));
+}
+
+// ---------------------------------------------------------------------------
+// Object / Field Permissions
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches raw ObjectPermissions rows for the given PermissionSet IDs, and
+ * FieldPermissions rows too if fieldApiName is provided. Pass fieldApiName as
+ * null for an object-level-only check (skips the FieldPermissions query).
+ */
+export async function getObjectAndFieldPermissions(
+  instanceUrl: string,
+  sessionId: string,
+  permissionSetIds: string[],
+  objectApiName: string,
+  fieldApiName: string | null
+): Promise<{ objectRows: ObjectPermissionRow[]; fieldRows: FieldPermissionRow[] | null }> {
+  const idList = permissionSetIds.map(id => `'${escapeSoqlString(id)}'`).join(',');
+  const escapedObject = escapeSoqlString(objectApiName);
+
+  const objectSoql = `SELECT ParentId, Parent.Label, Parent.IsOwnedByProfile, PermissionsCreate, PermissionsRead, PermissionsEdit, PermissionsDelete, PermissionsViewAllRecords, PermissionsModifyAllRecords FROM ObjectPermissions WHERE ParentId IN (${idList}) AND SobjectType = '${escapedObject}'`;
+  const objectRecords = await queryRestApi(instanceUrl, sessionId, objectSoql);
+
+  const objectRows: ObjectPermissionRow[] = objectRecords.map((r: any) => ({
+    parentId: r.ParentId,
+    parentLabel: r.Parent?.Label ?? '',
+    isOwnedByProfile: !!r.Parent?.IsOwnedByProfile,
+    create: !!r.PermissionsCreate,
+    read: !!r.PermissionsRead,
+    edit: !!r.PermissionsEdit,
+    delete: !!r.PermissionsDelete,
+    viewAll: !!r.PermissionsViewAllRecords,
+    modifyAll: !!r.PermissionsModifyAllRecords,
+  }));
+
+  if (!fieldApiName) {
+    return { objectRows, fieldRows: null };
+  }
+
+  const escapedField = escapeSoqlString(`${objectApiName}.${fieldApiName}`);
+  const fieldSoql = `SELECT ParentId, PermissionsRead, PermissionsEdit FROM FieldPermissions WHERE ParentId IN (${idList}) AND Field = '${escapedField}'`;
+  const fieldRecords = await queryRestApi(instanceUrl, sessionId, fieldSoql);
+
+  const fieldRows: FieldPermissionRow[] = fieldRecords.map((r: any) => ({
+    parentId: r.ParentId,
+    read: !!r.PermissionsRead,
+    edit: !!r.PermissionsEdit,
+  }));
+
+  return { objectRows, fieldRows };
 }
