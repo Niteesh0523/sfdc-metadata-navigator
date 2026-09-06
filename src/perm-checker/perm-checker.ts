@@ -254,4 +254,196 @@ function updateCheckButtonState(): void {
   btn.disabled = !(pickedEntity && pickedObject);
 }
 
+// ---------------------------------------------------------------------------
+// Check Access
+// ---------------------------------------------------------------------------
+
+async function runCheck(): Promise<void> {
+  if (!pickedEntity || !pickedObject) return;
+
+  setLoading(true);
+  document.getElementById('error-panel')!.hidden = true;
+  document.getElementById('results-panel')!.hidden = true;
+
+  try {
+    const permissionSetIds: string[] = [];
+    const sourceMeta = new Map<string, SourceMeta>();
+    const licenseBadges = new Map<string, { licenseName: string; assigned: boolean }>();
+
+    if (mode === 'profile') {
+      const profileResp = await sendMessage({ action: 'getProfilePermissionSetId', profileId: pickedEntity.id });
+      if (profileResp?.error) { showError(profileResp.error); return; }
+      if (!profileResp?.permSetId) { showError("Could not resolve this Profile's permission set."); return; }
+
+      permissionSetIds.push(profileResp.permSetId);
+      sourceMeta.set(profileResp.permSetId, { label: pickedEntity.label, isOwnedByProfile: true });
+    } else {
+      const [profileResp, assignedResp, licenseResp] = await Promise.all([
+        sendMessage({ action: 'getProfilePermissionSetId', profileId: pickedEntity.profileId }),
+        sendMessage({ action: 'getAssignedPermissionSets', userId: pickedEntity.id }),
+        sendMessage({ action: 'getPermissionSetLicenseAssignments', userId: pickedEntity.id }),
+      ]);
+
+      if (profileResp?.error) { showError(profileResp.error); return; }
+      if (assignedResp?.error) { showError(assignedResp.error); return; }
+
+      const assignedLicenseIds = new Set<string>(licenseResp?.licenseIds || []);
+
+      if (profileResp?.permSetId) {
+        permissionSetIds.push(profileResp.permSetId);
+        sourceMeta.set(profileResp.permSetId, { label: `Profile: ${pickedEntity.profileName}`, isOwnedByProfile: true });
+      }
+
+      for (const ps of (assignedResp?.permissionSets || [])) {
+        permissionSetIds.push(ps.permSetId);
+        sourceMeta.set(ps.permSetId, { label: ps.label, isOwnedByProfile: false });
+        if (ps.licenseId) {
+          licenseBadges.set(ps.permSetId, {
+            licenseName: ps.licenseName || 'Unknown License',
+            assigned: assignedLicenseIds.has(ps.licenseId),
+          });
+        }
+      }
+    }
+
+    if (permissionSetIds.length === 0) {
+      showError('No Profile or Permission Set found for this selection.');
+      return;
+    }
+
+    const permsResp = await sendMessage({
+      action: 'getObjectAndFieldPermissions',
+      permissionSetIds,
+      objectApiName: pickedObject.id,
+      fieldApiName: pickedField ? pickedField.id : null,
+    });
+
+    if (permsResp?.error) { showError(permsResp.error); return; }
+
+    const result = aggregatePermissions(permissionSetIds, sourceMeta, permsResp.objectRows, permsResp.fieldRows);
+    renderResults(result, licenseBadges);
+  } catch (e: unknown) {
+    showError(e instanceof Error ? e.message : 'Failed to check permissions.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(loading: boolean): void {
+  document.getElementById('loading-panel')!.hidden = !loading;
+  (document.getElementById('check-access-btn') as HTMLButtonElement).disabled = loading || !(pickedEntity && pickedObject);
+}
+
+function showError(message: string): void {
+  const panel = document.getElementById('error-panel')!;
+  document.getElementById('error-text')!.textContent = message;
+  panel.hidden = false;
+}
+
+// ---------------------------------------------------------------------------
+// Results Rendering
+// ---------------------------------------------------------------------------
+
+function permBadge(value: boolean | null): string {
+  if (value === null) return '<span class="perm-na">N/A</span>';
+  return value ? '<span class="perm-yes">&#10003; Yes</span>' : '<span class="perm-no">&#10007; No</span>';
+}
+
+const PERM_LABELS: Array<{ key: 'create' | 'read' | 'edit' | 'delete' | 'viewAll' | 'modifyAll'; label: string }> = [
+  { key: 'create', label: 'Create' },
+  { key: 'read', label: 'Read' },
+  { key: 'edit', label: 'Edit' },
+  { key: 'delete', label: 'Delete' },
+  { key: 'viewAll', label: 'View All' },
+  { key: 'modifyAll', label: 'Modify All' },
+];
+
+function renderResults(
+  result: AggregatedPermissions,
+  licenseBadges: Map<string, { licenseName: string; assigned: boolean }>
+): void {
+  const grid = document.getElementById('effective-grid')!;
+  grid.innerHTML = '';
+
+  for (const { key, label } of PERM_LABELS) {
+    const cell = document.createElement('div');
+    cell.className = 'perm-cell';
+    cell.innerHTML = `<span>${label}</span>${permBadge(result.effective[key])}`;
+    grid.appendChild(cell);
+  }
+
+  if (result.effective.fieldRead !== null) {
+    const readCell = document.createElement('div');
+    readCell.className = 'perm-cell';
+    readCell.innerHTML = `<span>Field Read</span>${permBadge(result.effective.fieldRead)}`;
+    grid.appendChild(readCell);
+
+    const editCell = document.createElement('div');
+    editCell.className = 'perm-cell';
+    editCell.innerHTML = `<span>Field Edit</span>${permBadge(result.effective.fieldEdit)}`;
+    grid.appendChild(editCell);
+  }
+
+  renderBreakdown(result, licenseBadges);
+
+  document.getElementById('results-panel')!.hidden = false;
+}
+
+function renderBreakdown(
+  result: AggregatedPermissions,
+  licenseBadges: Map<string, { licenseName: string; assigned: boolean }>
+): void {
+  const container = document.getElementById('breakdown-table')!;
+  container.innerHTML = '';
+
+  const showFieldCols = result.effective.fieldRead !== null;
+  const colCount = showFieldCols ? 8 : 6;
+
+  const header = document.createElement('div');
+  header.className = 'source-row source-row-header';
+  header.style.gridTemplateColumns = `1.6fr repeat(${colCount}, 0.6fr)`;
+  header.innerHTML = `<span>Source</span><span>Create</span><span>Read</span><span>Edit</span><span>Delete</span><span>View All</span><span>Modify All</span>${showFieldCols ? '<span>F.Read</span><span>F.Edit</span>' : ''}`;
+  container.appendChild(header);
+
+  for (const source of result.bySource) {
+    const row = document.createElement('div');
+    row.className = 'source-row';
+    row.style.gridTemplateColumns = `1.6fr repeat(${colCount}, 0.6fr)`;
+
+    const license = licenseBadges.get(source.permissionSetId);
+    const licenseHtml = license
+      ? `<span class="license-badge ${license.assigned ? 'assigned' : 'missing'}">${escapeHtml(license.licenseName)}${license.assigned ? '' : ' (not assigned)'}</span>`
+      : '';
+    const profileBadgeHtml = source.isProfile ? '<span class="profile-badge">Profile</span>' : '';
+
+    row.innerHTML = `
+      <span class="source-name">${escapeHtml(source.label)}${profileBadgeHtml}${licenseHtml}</span>
+      ${permBadge(source.create)}
+      ${permBadge(source.read)}
+      ${permBadge(source.edit)}
+      ${permBadge(source.delete)}
+      ${permBadge(source.viewAll)}
+      ${permBadge(source.modifyAll)}
+      ${showFieldCols ? permBadge(source.fieldRead) : ''}
+      ${showFieldCols ? permBadge(source.fieldEdit) : ''}
+    `;
+    container.appendChild(row);
+  }
+
+  const toggleBtn = document.getElementById('toggle-breakdown-btn')!;
+  toggleBtn.onclick = () => {
+    const isHidden = container.hidden;
+    container.hidden = !isHidden;
+    toggleBtn.textContent = isHidden ? 'Hide breakdown by source ▴' : 'Show breakdown by source ▾';
+  };
+  container.hidden = true;
+  toggleBtn.textContent = 'Show breakdown by source ▾';
+}
+
+function escapeHtml(text: string): string {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
 document.addEventListener('DOMContentLoaded', init);
