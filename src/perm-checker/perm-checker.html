@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perm Checker - SFDC Metadata Navigator</title>
+  <link rel="stylesheet" href="perm-checker.css">
+</head>
+<body>
+  <div class="pc-app">
+
+    <header class="pc-header">
+      <h1 class="header-title">Perm Checker</h1>
+    </header>
+
+    <div class="pc-tabs" role="tablist">
+      <button id="tab-user" class="pc-tab active" type="button" role="tab" aria-selected="true">By User</button>
+      <button id="tab-profile" class="pc-tab" type="button" role="tab" aria-selected="false">By Profile</button>
+    </div>
+
+    <p id="user-mode-note" class="pc-note">
+      Checks Profile + directly assigned Permission Sets. Permission Set Groups and Muting Permission Sets are not yet included.
+    </p>
+
+    <section class="card pc-form">
+      <div class="pc-field">
+        <label id="entity-label" class="pc-label" for="entity-search-input">User</label>
+        <div class="search-picker" id="entity-picker">
+          <input id="entity-search-input" class="search-input" type="text" autocomplete="off" placeholder="Search by name...">
+          <ul id="entity-dropdown" class="search-dropdown" hidden></ul>
+          <div id="entity-chip" class="chip" hidden>
+            <span id="entity-chip-label" class="chip-label"></span>
+            <button id="entity-chip-remove" class="chip-remove" type="button" aria-label="Clear selection">&#10005;</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pc-field">
+        <label class="pc-label" for="object-search-input">Object</label>
+        <div class="search-picker" id="object-picker">
+          <input id="object-search-input" class="search-input" type="text" autocomplete="off" placeholder="Search objects...">
+          <ul id="object-dropdown" class="search-dropdown" hidden></ul>
+          <div id="object-chip" class="chip" hidden>
+            <span id="object-chip-label" class="chip-label"></span>
+            <button id="object-chip-remove" class="chip-remove" type="button" aria-label="Clear selection">&#10005;</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pc-field">
+        <label class="pc-label" for="field-search-input">Field <span class="pc-optional">(optional)</span></label>
+        <div class="search-picker" id="field-picker">
+          <input id="field-search-input" class="search-input" type="text" autocomplete="off" placeholder="Select an object first" disabled>
+          <ul id="field-dropdown" class="search-dropdown" hidden></ul>
+          <div id="field-chip" class="chip" hidden>
+            <span id="field-chip-label" class="chip-label"></span>
+            <button id="field-chip-remove" class="chip-remove" type="button" aria-label="Clear selection">&#10005;</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="check-access-btn" class="btn btn-primary" type="button" disabled>Check Access</button>
+    </section>
+
+    <div id="loading-panel" class="loading-panel" hidden>
+      <div class="spinner"></div>
+      <p>Checking permissions...</p>
+    </div>
+
+    <div id="error-panel" class="error-panel" hidden>
+      <span class="error-icon">&#9888;</span>
+      <span id="error-text"></span>
+    </div>
+
+    <section id="results-panel" class="card" hidden>
+      <h2 class="card-title">Effective Access</h2>
+      <div id="effective-grid" class="perm-grid"></div>
+
+      <button id="toggle-breakdown-btn" class="pc-toggle-breakdown" type="button">Show breakdown by source &#9662;</button>
+      <div id="breakdown-table" class="source-table" hidden></div>
+    </section>
+
+  </div>
+
+  <script src="perm-checker.js"></script>
+</body>
+</html>
